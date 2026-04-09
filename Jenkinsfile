@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = 'dockerhub-creds' 
         // REPLACE 'your-docker-username' with your real username below
-        IMAGE_NAME = "jayakumaran/conference-app"
+        IMAGE_NAME = "baleshp/conference-app"
     }
 
     stages {
