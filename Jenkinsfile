@@ -2,21 +2,18 @@ pipeline {
     agent any
 
     environment {
-        // Use the exact ID you created in Jenkins Credentials for Docker Hub
         DOCKERHUB_CREDENTIALS = 'dockerhub-creds' 
-        IMAGE_NAME = "your-docker-username/conference-app"
+        // REPLACE 'your-docker-username' with your real username below
+        IMAGE_NAME = "baleshp"
     }
 
     stages {
-        // We removed the "Checkout" stage because Jenkins does this automatically 
-        // when using "Pipeline script from SCM"
-
         stage('Docker Build') {
             steps {
                 script {
-                    // Builds the image using the Dockerfile in your workspace
-                    sh "docker build -t ${IMAGE_NAME}:${env.BUILD_ID} ."
-                    sh "docker tag ${IMAGE_NAME}:${env.BUILD_ID} ${IMAGE_NAME}:latest"
+                    // Changed 'sh' to 'bat' for Windows
+                    bat "docker build -t %IMAGE_NAME%:%BUILD_ID% ."
+                    bat "docker tag %IMAGE_NAME%:%BUILD_ID% %IMAGE_NAME%:latest"
                 }
             }
         }
@@ -24,17 +21,18 @@ pipeline {
         stage('Push to DockerHub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-                    sh "echo \$PASS | docker login -u \$USER --password-stdin"
-                    sh "docker push ${IMAGE_NAME}:latest"
-                    sh "docker push ${IMAGE_NAME}:${env.BUILD_ID}"
+                    // Using batch syntax for credentials and login
+                    bat "echo %PASS% | docker login -u %USER% --password-stdin"
+                    bat "docker push %IMAGE_NAME%:latest"
+                    bat "docker push %IMAGE_NAME%:%BUILD_ID%"
                 }
             }
         }
 
         stage('Kubernetes Deploy') {
             steps {
-                // Ensure kubectl is installed on the Jenkins server
-                sh "kubectl apply -f k8s-deployment.yaml"
+                // Changed 'sh' to 'bat'
+                bat "kubectl apply -f k8s-deployment.yaml"
             }
         }
     }
